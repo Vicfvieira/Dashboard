@@ -26,9 +26,9 @@ function MenuUsuario() {
         <button
           type="button"
           className="flex items-center gap-2 rounded-md py-1 pr-1.5 pl-1 text-left transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
-          aria-label={`Conta de ${usuario.nome}`}
         >
-          <span className="flex size-7 items-center justify-center rounded-full bg-primary/20 text-[11px] font-semibold text-primary" aria-hidden="true">
+          <span className="sr-only lg:hidden">Conta de {usuario.nome}</span>
+          <span className="flex size-7 items-center justify-center rounded-full bg-primary/20 text-[11px] font-semibold text-primary-ink" aria-hidden="true">
             {iniciais(usuario.nome)}
           </span>
           <span className="hidden min-w-0 lg:block">
@@ -77,11 +77,11 @@ export function Topbar() {
             <li className="truncate font-medium" aria-current="page">{item?.rotulo ?? "Painelux"}</li>
           </ol>
         </nav>
-        <div className="hidden min-w-0 flex-1 justify-center md:flex">
+        <div className="hidden min-w-0 flex-1 justify-center md:flex" data-tour="filtros">
           {item?.filtros.periodo && <FiltrosGlobais comProduto={item.filtros.produto} />}
         </div>
         <div className="ml-auto flex items-center gap-1 md:ml-0">
-          <Button variant="outline" size="sm" onClick={() => setPaletaAberta(true)} className="h-8 gap-2 text-muted-foreground" aria-label="Abrir paleta de comandos (Ctrl+K)">
+          <Button variant="outline" size="sm" onClick={() => setPaletaAberta(true)} className="h-8 gap-2 text-muted-foreground" aria-label="Abrir paleta de comandos (Ctrl+K)" data-tour="busca">
             <Search aria-hidden="true" />
             <span className="hidden text-xs xl:inline">Buscar</span>
             <kbd className="hidden rounded border border-border px-1 font-mono text-[10px] sm:inline">Ctrl K</kbd>

@@ -41,7 +41,7 @@ export function Destaques({ movimentos, titulo, descricao, query }: { movimentos
                     </p>
                   </div>
                 </div>
-                <Link href={`${m.href}${query}`} className="mt-2 ml-10 inline-flex items-center gap-1 text-xs text-primary hover:underline focus-visible:underline focus-visible:outline-none">
+                <Link href={`${m.href}${query}`} className="mt-2 ml-10 inline-flex items-center gap-1 text-xs text-primary-ink hover:underline focus-visible:underline focus-visible:outline-none">
                   Ver em {DESTINO[m.href] ?? "detalhes"} <ArrowRight className="size-3" aria-hidden="true" />
                 </Link>
               </li>

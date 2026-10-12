@@ -4,6 +4,7 @@ import { AuthError } from "next-auth";
 import { z } from "zod";
 import { signIn } from "@/auth";
 import { BLOQUEIO_MINUTOS } from "@/lib/auth/login";
+import { credenciaisDemo } from "@/lib/demo";
 
 export interface EstadoLogin {
   erro: string | null;
@@ -52,6 +53,20 @@ export async function entrar(_anterior: EstadoLogin, dados: FormData): Promise<E
       return { erro: "E-mail ou senha incorretos.", email };
     }
     // Redirecionamento de sucesso do signIn (NEXT_REDIRECT) e erros inesperados seguem adiante.
+    throw erro;
+  }
+}
+
+/** Um clique para recrutadores: entra na conta de demonstração (somente leitura). */
+export async function entrarComoDemo(_anterior: EstadoLogin, dados: FormData): Promise<EstadoLogin> {
+  const demo = credenciaisDemo();
+  if (!demo) return { erro: "O acesso de demonstração não está configurado neste ambiente.", email: "" };
+  const destino = dados.get("destino");
+  try {
+    await signIn("credentials", { email: demo.email, senha: demo.senha, redirectTo: destinoSeguro(typeof destino === "string" ? destino : undefined) });
+    return { erro: null, email: "" };
+  } catch (erro) {
+    if (erro instanceof AuthError) return { erro: "Não foi possível abrir a demonstração agora. Tente as credenciais abaixo.", email: "" };
     throw erro;
   }
 }

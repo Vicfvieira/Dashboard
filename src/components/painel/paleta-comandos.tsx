@@ -233,7 +233,7 @@ export function PaletaComandos() {
                       {c.rotulo}
                       {c.detalhe && <span className="ml-2 text-xs text-muted-foreground">{c.detalhe}</span>}
                     </span>
-                    {c.ativo && <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-primary">atual</span>}
+                    {c.ativo && <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">atual</span>}
                     {ehSelecionado && <CornerDownLeft className="!size-3.5 !text-muted-foreground" aria-hidden="true" />}
                   </div>
                 );

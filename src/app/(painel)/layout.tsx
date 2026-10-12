@@ -4,6 +4,7 @@ import { ProvedorPainel } from "@/components/painel/contexto";
 import { PaletaComandos } from "@/components/painel/paleta-comandos";
 import { Sidebar, SidebarMovel } from "@/components/painel/sidebar";
 import { Topbar } from "@/components/painel/topbar";
+import { TourDemo } from "@/components/painel/tour-demo";
 import { Rodape } from "@/components/rodape";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { itensVisiveis } from "@/lib/navegacao";
@@ -49,6 +50,7 @@ async function ShellAutenticado({ children }: { children: React.ReactNode }) {
         </div>
         <SidebarMovel />
         <PaletaComandos />
+        <TourDemo />
       </ProvedorPainel>
     </TooltipProvider>
   );

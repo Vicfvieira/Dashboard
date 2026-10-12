@@ -22,7 +22,8 @@ export function FiltrosGlobais({ comProduto }: { comProduto: boolean }) {
 
   return (
     <div className="flex min-w-0 flex-nowrap items-center gap-2">
-      <div role="radiogroup" aria-label="Período" className="relative flex items-center rounded-lg border border-border bg-card p-0.5">
+      <div className="flex items-center rounded-lg border border-border bg-card p-0.5">
+      <div role="radiogroup" aria-label="Período" className="relative flex items-center">
         {FIXOS.map((p) => {
           const ativo = filtros.periodo === p;
           return (
@@ -49,6 +50,8 @@ export function FiltrosGlobais({ comProduto }: { comProduto: boolean }) {
             </button>
           );
         })}
+      </div>
+        {/* Fora do radiogroup: abre um popover (botão comum), não é uma opção de rádio. */}
         <PeriodoPersonalizado />
       </div>
 
@@ -58,6 +61,7 @@ export function FiltrosGlobais({ comProduto }: { comProduto: boolean }) {
             variant="outline"
             size="sm"
             aria-pressed={filtros.comparar}
+            aria-label="Comparar com o período anterior"
             onClick={() => alterar({ comparar: !filtros.comparar })}
             className={cn("h-8", filtros.comparar && "border-primary/50 bg-primary/10 text-foreground")}
           >
@@ -74,7 +78,7 @@ export function FiltrosGlobais({ comProduto }: { comProduto: boolean }) {
       {comProduto && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8">
+            <Button variant="outline" size="sm" className="h-8" aria-label={`Produto: ${ROTULO_PRODUTO[filtros.produto]}`}>
               <MarcaProduto produto={filtros.produto} />
               <span className="hidden md:inline">{ROTULO_PRODUTO[filtros.produto]}</span>
               <ChevronDown className="text-muted-foreground" aria-hidden="true" />
@@ -143,9 +147,7 @@ function PeriodoPersonalizado() {
       <PopoverTrigger asChild>
         <button
           type="button"
-          role="radio"
-          aria-checked={ativo}
-          aria-label="Período personalizado"
+          aria-label={ativo ? `Período personalizado: ${descreverIntervalo(intervalo)}` : "Período personalizado"}
           className={cn(
             "flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
             ativo ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",

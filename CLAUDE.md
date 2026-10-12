@@ -89,6 +89,15 @@
   `GET /api/logs/exportar`, limite de 10 mil linhas, auditado). CSV: `src/lib/csv.ts` neutraliza fórmulas
   (=, +, -, @). `caption.sr-only` em contêiner com rolagem horizontal precisa de `relative` no pai.
   `forbidden.tsx` não usa `<main>` (renderiza dentro do `<main>` do painel).
+- Entrega (Etapa 12): tela de entrada é a vitrine do portfólio (apresentação, links para Pelagem, Lírio e
+  GitHub, botão “Explorar a demonstração” = Server Action `entrarComoDemo` com `credenciaisDemo()` de
+  `src/lib/demo.ts`, que lê SEED_DEMO_PASSWORD; as credenciais aparecem na tela, por definição públicas).
+  Conta somente leitura não sofre bloqueio por tentativas (falhas seguem auditadas). Tour da demo em
+  `src/components/painel/tour-demo.tsx` (alvos `data-tour`; "visto" em localStorage, porque a conta é
+  compartilhada; `tourConcluidoEm` não é usado). Headers em `next.config.ts` (CSP sem nonce por causa do PPR;
+  `upgrade-insecure-requests` só com VERCEL). `opengraph-image.tsx`, `icon.svg` e `robots.ts` (só /login
+  indexável) ficam fora do proxy. Erros: `not-found.tsx`, `(painel)/error.tsx` e `global-error.tsx` (props
+  `error` e `retry`). Prints do README em `docs/prints` (gerados localmente; o print do login esconde a senha local).
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de

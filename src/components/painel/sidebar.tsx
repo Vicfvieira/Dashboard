@@ -11,6 +11,7 @@ import { NOME_GRUPO, itemDaRota, type GrupoNavegacao, type ItemNavegacao } from 
 import { cn } from "@/lib/utils";
 import { usePainel } from "./contexto";
 import { ICONES } from "./icones";
+import { reverTour } from "./tour-demo";
 import { useFiltros } from "./use-filtros";
 
 const ORDEM_GRUPOS: GrupoNavegacao[] = ["analise", "operacao", "administracao"];
@@ -22,7 +23,7 @@ function ListaNavegacao({ recolhida, aoNavegar }: { recolhida: boolean; aoNavega
   const ativo = itemDaRota(caminho)?.rota;
 
   return (
-    <nav aria-label="Navegação principal" className="flex flex-1 flex-col gap-5 overflow-y-auto px-2 py-3">
+    <nav aria-label="Navegação principal" data-tour="menu" className="flex flex-1 flex-col gap-5 overflow-y-auto px-2 py-3">
       {ORDEM_GRUPOS.map((grupo) => {
         const doGrupo = itens.filter((i) => i.grupo === grupo);
         if (doGrupo.length === 0) return null;
@@ -87,16 +88,26 @@ function AvisoDemonstracao({ recolhida }: { recolhida: boolean }) {
   const { usuario } = usePainel();
   if (!usuario.somenteLeitura) return null;
   const conteudo = (
-    <div className={cn("flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-2 text-xs", recolhida && "justify-center px-0")}>
-      <Eye className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
-      <span className={cn(recolhida && "sr-only")}>Acesso de demonstração: somente leitura</span>
-    </div>
+    <button
+      type="button"
+      onClick={reverTour}
+      className={cn(
+        "flex w-full items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-2 text-left text-xs transition-colors hover:bg-primary/15 focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50 focus-visible:outline-none",
+        recolhida && "justify-center px-0",
+      )}
+    >
+      <Eye className="size-3.5 shrink-0 text-primary-ink" aria-hidden="true" />
+      <span className={cn(recolhida && "sr-only")}>
+        Demonstração: somente leitura
+        <span className="block text-[11px] text-muted-foreground">Ver o tour de novo</span>
+      </span>
+    </button>
   );
   if (!recolhida) return conteudo;
   return (
     <Tooltip>
       <TooltipTrigger asChild>{conteudo}</TooltipTrigger>
-      <TooltipContent side="right">Acesso de demonstração: somente leitura</TooltipContent>
+      <TooltipContent side="right">Demonstração, somente leitura: ver o tour de novo</TooltipContent>
     </Tooltip>
   );
 }

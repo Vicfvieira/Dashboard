@@ -64,7 +64,11 @@ export async function verificarLogin(deps: DependenciasLogin, emailInformado: st
     return { ok: false, motivo: "credenciais_invalidas" };
   }
 
-  if (usuario.bloqueadoAte && usuario.bloqueadoAte.getTime() > agora.getTime()) {
+  // A conta de demonstração tem senha pública e só lê: bloqueá-la não protege nada e deixaria
+  // qualquer pessoa tirar o acesso de recrutadores errando a senha 5 vezes. As falhas seguem auditadas.
+  const contaPublica = usuario.somenteLeitura;
+
+  if (!contaPublica && usuario.bloqueadoAte && usuario.bloqueadoAte.getTime() > agora.getTime()) {
     await deps.auditar({ acao: "LOGIN_BLOQUEADO", usuarioId: usuario.id, email, motivo: "conta_bloqueada", bloqueadoAte: usuario.bloqueadoAte });
     return { ok: false, motivo: "bloqueada", bloqueadoAte: usuario.bloqueadoAte };
   }
@@ -73,6 +77,11 @@ export async function verificarLogin(deps: DependenciasLogin, emailInformado: st
 
   if (!usuario.ativo) {
     await deps.auditar({ acao: "LOGIN_FALHA", usuarioId: usuario.id, email, motivo: "conta_inativa" });
+    return { ok: false, motivo: "credenciais_invalidas" };
+  }
+
+  if (!senhaConfere && contaPublica) {
+    await deps.auditar({ acao: "LOGIN_FALHA", usuarioId: usuario.id, email, motivo: "senha_incorreta" });
     return { ok: false, motivo: "credenciais_invalidas" };
   }
 

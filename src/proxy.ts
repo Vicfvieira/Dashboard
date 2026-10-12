@@ -24,5 +24,6 @@ export default auth((req) => {
 
 export const config = {
   // Fora do proxy: rotas do Auth.js, cron (protegido por CRON_SECRET), assets e arquivos estáticos.
-  matcher: ["/((?!api/auth|api/cron|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp|ico|json|txt)$).*)"],
+  // Imagem de prévia e ícone também ficam públicos: robôs de redes sociais não fazem login.
+  matcher: ["/((?!api/auth|api/cron|_next/static|_next/image|favicon.ico|icon|opengraph-image|twitter-image|.*\\.(?:svg|png|jpg|jpeg|webp|ico|json|txt)$).*)"],
 };

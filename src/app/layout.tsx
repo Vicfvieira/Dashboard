@@ -8,10 +8,17 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const DESCRICAO = "Painel de gestão fictício que consolida um pet spa e um marketplace de beleza: KPIs, funil, mapa de oferta e demanda dos 96 distritos de São Paulo, insights por regras, RBAC e auditoria. Projeto de portfólio de Victoria Fernandes Vieira.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://painelux.vercel.app"),
   title: { default: "Painelux", template: "%s · Painelux" },
-  description:
-    "Painel de gestão que consolida dados do Pelagem Studio e da Lírio: KPIs, funil, mapa de oferta e demanda e insights.",
+  description: DESCRICAO,
+  applicationName: "Painelux",
+  authors: [{ name: "Victoria Fernandes Vieira" }],
+  openGraph: { type: "website", locale: "pt_BR", siteName: "Painelux", title: "Painelux · painel de gestão (projeto de portfólio)", description: DESCRICAO },
+  twitter: { card: "summary_large_image", title: "Painelux · painel de gestão (projeto de portfólio)", description: DESCRICAO },
+  // Só a tela de entrada é indexável (ela define o próprio robots); o painel exige login.
   robots: { index: false, follow: false },
 };
 

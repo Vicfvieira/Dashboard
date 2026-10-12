@@ -82,6 +82,15 @@ describe("login com bloqueio por tentativas", () => {
     expect(c.eventos[0]).toMatchObject({ acao: "LOGIN_BLOQUEADO", motivo: "conta_bloqueada" });
   });
 
+  it("não bloqueia a conta de demonstração (senha pública, somente leitura), mas audita as falhas", async () => {
+    const d = cenario({ email: "demo@painelux.dev", somenteLeitura: true, bloqueadoAte: new Date("2026-10-12T12:10:00.000Z") });
+    for (let i = 0; i < MAX_TENTATIVAS + 2; i++) await verificarLogin(d.deps, "demo@painelux.dev", "errada");
+    expect(d.usuario.bloqueadoAte?.toISOString()).toBe("2026-10-12T12:10:00.000Z"); // nada novo gravado
+    expect(d.usuario.tentativasFalhas).toBe(0);
+    expect(d.eventos.every((e) => e.acao === "LOGIN_FALHA")).toBe(true);
+    expect((await verificarLogin(d.deps, "demo@painelux.dev", "senha-certa")).ok).toBe(true);
+  });
+
   it("libera o acesso quando os 15 minutos passam", async () => {
     for (let i = 0; i < MAX_TENTATIVAS; i++) await verificarLogin(c.deps, "gestor@painelux.dev", "errada");
     c.avancarMinutos(BLOQUEIO_MINUTOS - 1);
