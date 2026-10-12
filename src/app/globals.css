@@ -40,6 +40,8 @@
      As cores puras das marcas (#E8833A, #D8B4A6) ficam para identidade (pontos, selos), não para séries. */
   --serie-pelagem: #d9772f;
   --serie-lirio: #a85c86;
+  /* Espécie no Pelagem: cachorro usa a série da marca; gato, azul validado com ela (CVD e ≥ 3:1). */
+  --serie-gato: #3e7cb1;
 
   /* Séries de gráficos */
   --chart-1: #7c3aed;
@@ -135,6 +137,7 @@
   --color-lirio-ink: var(--lirio-ink);
   --color-serie-pelagem: var(--serie-pelagem);
   --color-serie-lirio: var(--serie-lirio);
+  --color-serie-gato: var(--serie-gato);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

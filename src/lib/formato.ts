@@ -2,6 +2,9 @@ const inteiro = new Intl.NumberFormat("pt-BR");
 const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 const percentual = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 });
 
+/** Formatos de número dos KPIs (moeda em centavos; percentual como fração). */
+export type FormatoNumero = "inteiro" | "moeda" | "percentual";
+
 export const formatarInteiro = (n: number) => inteiro.format(n);
 export const formatarMoeda = (centavos: number) => moeda.format(centavos / 100);
 export const formatarPercentual = (fracao: number) => percentual.format(fracao);
@@ -10,6 +13,12 @@ export const formatarPercentual = (fracao: number) => percentual.format(fracao);
 export function formatarVariacao(v: number): string {
   const texto = percentual.format(Math.abs(v));
   return `${v > 0 ? "+" : v < 0 ? "−" : ""}${texto}`;
+}
+
+/** Diferença em pontos percentuais: "+2,1 p.p." / "−0,4 p.p.". */
+export function formatarPontos(p: number): string {
+  const texto = Math.abs(p).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+  return `${p > 0 ? "+" : p < 0 ? "−" : ""}${texto} p.p.`;
 }
 
 const dataHoraSP = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });

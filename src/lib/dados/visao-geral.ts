@@ -2,6 +2,7 @@ import "server-only";
 import { nomeCategoria } from "@/data/categorias";
 import { REGIOES } from "@/data/sp-geo";
 import { intervaloAnterior, type Filtros, type Intervalo } from "@/lib/filtros";
+import type { FormatoNumero } from "@/lib/formato";
 import { agruparPorSemana, completarDias, granularidade, maioresMovimentos, ticketMedio, type CandidatoMovimento, type Movimento, type PontoSerie } from "@/lib/metrics";
 import { prisma } from "@/lib/prisma";
 import { limitesUtc } from "./periodo";
@@ -137,16 +138,20 @@ async function candidatosPelagem(atual: Intervalo, anterior: Intervalo): Promise
 
 // ─── Visão geral ──────────────────────────────────────────────────────────────
 
-export type ChaveKpi = "faturamento" | "atendimentos" | "ticket" | "buscas" | "cliques" | "oferta";
+export type ChaveKpi = "faturamento" | "atendimentos" | "ticket" | "buscas" | "cliques" | "oferta" | "cancelamento" | "retorno" | "inativos" | "atendidos" | "recorrentes" | "recuperavel";
 
 export interface Kpi {
   chave: ChaveKpi;
   rotulo: string;
   marca: "pelagem" | "lirio";
-  formato: "moeda" | "inteiro";
+  formato: FormatoNumero;
   valor: number;
   anterior: number | null;
   ajuda: string;
+  /** Alta é ruim (ex.: cancelamentos): a variação positiva aparece em vermelho. */
+  menorMelhor?: boolean;
+  /** Texto no lugar da variação quando o indicador não tem período anterior (ex.: "posição de hoje"). */
+  notaComparacao?: string;
   /** Série para a sparkline (diária ou semanal). */
   serie: number[];
 }

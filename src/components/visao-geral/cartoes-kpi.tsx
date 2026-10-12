@@ -4,9 +4,9 @@ import { ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts";
 import { CountUp, formatarNumero } from "@/components/graficos/count-up";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatarVariacao } from "@/lib/formato";
+import { formatarPontos, formatarVariacao } from "@/lib/formato";
 import type { Kpi } from "@/lib/dados/visao-geral";
-import { variacao } from "@/lib/metrics";
+import { variacao, variacaoPontos } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
 
 const COR = { pelagem: "var(--serie-pelagem)", lirio: "var(--serie-lirio)" } as const;
@@ -36,7 +36,10 @@ export function CartoesKpi({ kpis, comparar, descricaoAnterior }: { kpis: Kpi[];
   return (
     <div className={cn("grid gap-3 sm:grid-cols-2 lg:grid-cols-3", kpis.length >= 5 && "2xl:grid-cols-6")}>
       {kpis.map((k) => {
-        const v = k.anterior === null ? null : variacao(k.valor, k.anterior);
+        // Taxas variam em pontos percentuais; volumes, em variação relativa.
+        const emPontos = k.formato === "percentual";
+        const v = k.anterior === null ? null : emPontos ? variacaoPontos(k.valor, k.anterior) : variacao(k.valor, k.anterior);
+        const bom = v === null || v === 0 ? null : (v > 0) !== Boolean(k.menorMelhor);
         return (
           <section key={k.chave} aria-label={k.rotulo} className="group flex flex-col rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
             <div className="flex items-center justify-between gap-2">
@@ -55,13 +58,13 @@ export function CartoesKpi({ kpis, comparar, descricaoAnterior }: { kpis: Kpi[];
             </div>
             <CountUp valor={k.valor} formato={k.formato} className="mt-2 text-2xl font-semibold tracking-tight" />
             {comparar && (
-              <p className={cn("mt-1 flex items-center gap-1 text-xs", v === null ? "text-muted-foreground" : v >= 0 ? "text-success" : "text-destructive")}>
-                {v === null ? <Minus className="size-3.5" aria-hidden="true" /> : v >= 0 ? <ArrowUpRight className="size-3.5" aria-hidden="true" /> : <ArrowDownRight className="size-3.5" aria-hidden="true" />}
+              <p className={cn("mt-1 flex items-center gap-1 text-xs", bom === null ? "text-muted-foreground" : bom ? "text-success" : "text-destructive")}>
+                {v === null || v === 0 ? <Minus className="size-3.5" aria-hidden="true" /> : v > 0 ? <ArrowUpRight className="size-3.5" aria-hidden="true" /> : <ArrowDownRight className="size-3.5" aria-hidden="true" />}
                 {v === null ? (
-                  <span className="text-muted-foreground">sem base de comparação</span>
+                  <span className="text-muted-foreground">{k.notaComparacao ?? "sem base de comparação"}</span>
                 ) : (
                   <span>
-                    <span className="font-medium tabular-nums">{formatarVariacao(v)}</span>
+                    <span className="font-medium tabular-nums">{emPontos ? formatarPontos(v) : formatarVariacao(v)}</span>
                     <span className="text-muted-foreground"> vs. {formatarNumero(k.anterior ?? 0, k.formato)}</span>
                   </span>
                 )}

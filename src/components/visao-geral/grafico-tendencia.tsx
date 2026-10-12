@@ -3,11 +3,11 @@
 import { useMemo, useState } from "react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps, type TooltipValueType } from "recharts";
 import { CartaoGrafico } from "@/components/graficos/cartao-grafico";
+import { Segmentado } from "@/components/graficos/segmentado";
 import type { ColunaTabela, LinhaTabela } from "@/components/graficos/exportar";
 import type { PontoTendencia } from "@/lib/dados/visao-geral";
 import { formatarInteiro, formatarMoeda } from "@/lib/formato";
 import { indexar } from "@/lib/metrics";
-import { cn } from "@/lib/utils";
 
 type MetricaPelagem = "faturamento" | "atendimentos";
 type MetricaLirio = "buscas" | "cliques";
@@ -24,28 +24,6 @@ const rotuloData = (iso: string) => mesCurto.format(new Date(`${iso}T00:00:00Z`)
 
 function formatar(metrica: MetricaPelagem | MetricaLirio, v: number) {
   return metrica === "faturamento" ? formatarMoeda(v) : formatarInteiro(v);
-}
-
-function Segmentado<T extends MetricaPelagem | MetricaLirio>({ rotulo, opcoes, valor, aoMudar }: { rotulo: string; opcoes: readonly T[]; valor: T; aoMudar: (v: T) => void }) {
-  return (
-    <div role="radiogroup" aria-label={rotulo} className="flex items-center rounded-md border border-border p-0.5">
-      {opcoes.map((o) => (
-        <button
-          key={o}
-          type="button"
-          role="radio"
-          aria-checked={o === valor}
-          onClick={() => aoMudar(o)}
-          className={cn(
-            "h-6 rounded px-2 text-[11px] font-medium transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
-            o === valor ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {ROTULO[o]}
-        </button>
-      ))}
-    </div>
-  );
 }
 
 interface Linha {
@@ -151,8 +129,8 @@ export function GraficoTendencia({
       className="lg:col-span-2"
       acoes={
         <>
-          {verPelagem && opcoesPelagem.length > 1 && <Segmentado rotulo="Métrica do Pelagem" opcoes={opcoesPelagem} valor={mp} aoMudar={setMp} />}
-          {verLirio && <Segmentado rotulo="Métrica da Lírio" opcoes={["buscas", "cliques"] as const} valor={ml} aoMudar={setMl} />}
+          {verPelagem && opcoesPelagem.length > 1 && <Segmentado rotulo="Métrica do Pelagem" opcoes={opcoesPelagem.map((o) => ({ valor: o, rotulo: ROTULO[o] }))} valor={mp} aoMudar={setMp} />}
+          {verLirio && <Segmentado rotulo="Métrica da Lírio" opcoes={(["buscas", "cliques"] as const).map((o) => ({ valor: o, rotulo: ROTULO[o] }))} valor={ml} aoMudar={setMl} />}
         </>
       }
     >

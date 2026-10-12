@@ -47,6 +47,14 @@
   Nunca dois eixos Y: duas grandezas = índice (100 = média) ou gráficos separados. Cores de série das
   marcas validadas pelo dataviz: `--serie-pelagem #D9772F` e `--serie-lirio #A85C86` (as cores
   puras das marcas falham como série). Diário até 31 dias, semanal acima, só semanas completas.
+- Pelagem (Etapa 7): dados em `src/lib/dados/pelagem.ts` (resumo, semanas completas com até 12 de
+  contexto esmaecidas, top 10 serviço × porte, calor dia × hora, mix porte × espécie, cancelamento por
+  dia, `clientesInativos(agora)` = último concluído > 30 dias e nada agendado, independe do período).
+  Sem `pelagem:financeiro`, a página zera valores no servidor antes de enviar ao cliente. Mapa de calor
+  é SVG próprio (exportável). Tabela de inativos: TanStack Table v9 (`useTable` + `tableFeatures` no
+  escopo do módulo); CSV de hashes só baixa depois de `registrarExportacao` responder ok. Rótulos em
+  `src/lib/rotulos-pelagem.ts`; cor de gato `--serie-gato #3E7CB1`. KPIs aceitam `percentual`
+  (variação em p.p.), `menorMelhor` e `notaComparacao`. `Segmentado` em `src/components/graficos/`.
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de

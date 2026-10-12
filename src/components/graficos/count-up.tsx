@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { animate, useReducedMotion } from "motion/react";
-import { formatarInteiro, formatarMoeda } from "@/lib/formato";
+import { formatarInteiro, formatarMoeda, formatarPercentual, type FormatoNumero } from "@/lib/formato";
 
 const assinarNada = () => () => {};
 
-export type FormatoNumero = "inteiro" | "moeda";
+export type { FormatoNumero };
 
 export function formatarNumero(valor: number, formato: FormatoNumero): string {
-  return formato === "moeda" ? formatarMoeda(valor) : formatarInteiro(Math.round(valor));
+  if (formato === "moeda") return formatarMoeda(valor);
+  if (formato === "percentual") return formatarPercentual(valor);
+  return formatarInteiro(Math.round(valor));
 }
 
 /**
