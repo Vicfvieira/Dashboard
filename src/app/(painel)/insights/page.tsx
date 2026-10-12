@@ -65,7 +65,7 @@ async function Conteudo({ searchParams }: { searchParams: PageProps<"/insights">
           <p className="mb-3 max-w-3xl text-muted-foreground">
             Cada regra compara o período escolhido com o anterior de mesmo tamanho e só gera uma frase quando passa do limite e a base é grande o bastante para não apontar ruído. A ordem segue a prioridade e, dentro dela, a força do sinal. Testes automatizados conferem cada regra.
           </p>
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full min-w-[560px]">
               <caption className="sr-only">Regras dos insights e seus limites</caption>
               <thead>

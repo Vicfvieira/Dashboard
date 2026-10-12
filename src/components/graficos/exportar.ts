@@ -1,3 +1,5 @@
+import { celulaTexto } from "@/lib/csv";
+
 /** Exportação no navegador: CSV (separador ";" e vírgula decimal, como o Excel em pt-BR) e PNG do SVG. */
 
 export interface ColunaTabela {
@@ -26,7 +28,7 @@ function celulaCsv(valor: string | number | null, formato: ColunaTabela["formato
     const n = formato === "moeda" ? valor / 100 : valor;
     texto = String(Number.isInteger(n) ? n : n.toFixed(formato === "percentual" ? 4 : 2)).replace(".", ",");
   } else {
-    texto = valor;
+    return celulaTexto(valor);
   }
   return /[";\n]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
 }

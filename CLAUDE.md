@@ -80,6 +80,15 @@
   mesmos carregadores das páginas de origem (o número da frase é o do gráfico). Links levam ao cartão de
   origem: `CartaoGrafico` usa `recurso` como `id` e `useRolarSeAncora` rola até ele depois do streaming.
   Texto roxo sobre card: use `text-primary-ink` (a primária pura não passa AA no escuro).
+- Administração (Etapa 11): Agenda (`/agenda?dia=`) lê `AppointmentFact` com seleção explícita sem
+  centavos e mapeia por `paraItemAgenda` (teste garante as chaves); ocupação limitada à capacidade 2
+  com encaixes sinalizados. Usuários: regras em `src/lib/usuarios.ts` (último ADMIN, ninguém tira o
+  próprio acesso, senha temporária de 16 caracteres mostrada uma vez), Server Actions em
+  `src/app/(painel)/usuarios/acoes.ts` com `pg_advisory_xact_lock` e auditoria (recusas com
+  sucesso = false). Logs: filtros puros em `src/lib/logs.ts` (mesmo `where` na tela e no CSV de
+  `GET /api/logs/exportar`, limite de 10 mil linhas, auditado). CSV: `src/lib/csv.ts` neutraliza fórmulas
+  (=, +, -, @). `caption.sr-only` em contêiner com rolagem horizontal precisa de `relative` no pai.
+  `forbidden.tsx` não usa `<main>` (renderiza dentro do `<main>` do painel).
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de
