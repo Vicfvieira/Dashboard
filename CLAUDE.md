@@ -9,6 +9,18 @@
   `src/components/ui` seguindo o padrão new-york.
 - `npm run build` = `prisma generate && prisma migrate deploy && next build` (usado pela Vercel).
   Localmente sem banco, use `npm run build:local`.
+- Infraestrutura (Etapa 1):
+  - Neon: projeto `painelux` (id `mute-cell-98742187`, aws-sa-east-1, PG 17, banco `neondb`).
+  - Vercel: projeto `painelux` (id `prj_RTMzuL72g6dwbF7uARcU54wloJxO`), ligado a `Vicfvieira/Dashboard`
+    na branch main, funções em gru1. Produção: https://painelux.vercel.app
+  - APIs: Pelagem em https://pelagem-studio.vercel.app e Lírio em https://lirio-estetica.vercel.app
+    (`/api/integracao/*`, header `x-api-key`, 401 sem chave). Formatos observados: Pelagem
+    `/agendamentos` → `{ dados: [...] }` com `clienteHash`, `servico`, `porte`, `status`, `inicio`,
+    valores em centavos; Lírio `/profissionais` → `{ itens: [{ distrito, nomeDistrito, subprefeitura,
+    regiao, categoria, total, verificadas }] }`, `/eventos` → `{ periodo, totais, itens: [{ dia,
+    distrito, categoria, buscas, visualizacoes, cliquesWhatsapp, cliquesInstagram }] }`.
+  - A rede do ambiente de desenvolvimento bloqueia `*.vercel.app`, APIs da Vercel/Neon e a porta 5432:
+    use os conectores (MCP) da Neon e da Vercel; testes HTTP externos via Vercel Sandbox.
 - Next.js 16 com `cacheComponents`: leia `node_modules/next/dist/docs/` antes de usar APIs novas.
 
 ---
