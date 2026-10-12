@@ -38,7 +38,7 @@ export async function gravarAgendamentos(agendamentos: readonly AgendamentoApi[]
             "inicio", "fim", "duracaoMinutos", "valorServicoCentavos", "taxaTaxiCentavos", "totalCentavos",
             "zonaTaxi", "criadoEmOrigem", "canceladoEmOrigem", "origem", "sincronizadoEm"
           )
-          SELECT u.id, u.id_origem, u.cliente, u.slug, u.nome, u.porte::"Porte", NULL, u.status::"StatusAtendimento",
+          SELECT u.id, u.id_origem, u.cliente, u.slug, u.nome, u.porte::"Porte", u.especie::"Especie", u.status::"StatusAtendimento",
                  u.inicio::timestamptz, u.fim::timestamptz, u.duracao, u.valor, u.taxa, u.total,
                  u.zona, u.criado::timestamptz, u.cancelado::timestamptz, 'API'::"OrigemDado", ${inicioExecucao}
           FROM unnest(
@@ -48,6 +48,7 @@ export async function gravarAgendamentos(agendamentos: readonly AgendamentoApi[]
             ${lote.map((a) => a.servico.slug)}::text[],
             ${lote.map((a) => a.servico.nome)}::text[],
             ${lote.map((a) => a.porte)}::text[],
+            ${lote.map((a) => a.especie)}::text[],
             ${lote.map((a) => a.status)}::text[],
             ${lote.map((a) => a.inicio)}::text[],
             ${lote.map((a) => a.fim)}::text[],
@@ -58,12 +59,13 @@ export async function gravarAgendamentos(agendamentos: readonly AgendamentoApi[]
             ${lote.map((a) => a.zonaTaxi)}::text[],
             ${lote.map((a) => a.criadoEm)}::text[],
             ${lote.map((a) => a.canceladoEm)}::text[]
-          ) AS u(id, id_origem, cliente, slug, nome, porte, status, inicio, fim, duracao, valor, taxa, total, zona, criado, cancelado)
+          ) AS u(id, id_origem, cliente, slug, nome, porte, especie, status, inicio, fim, duracao, valor, taxa, total, zona, criado, cancelado)
           ON CONFLICT ("idOrigem") DO UPDATE SET
             "clienteHash" = EXCLUDED."clienteHash",
             "servicoSlug" = EXCLUDED."servicoSlug",
             "servicoNome" = EXCLUDED."servicoNome",
             "porte" = EXCLUDED."porte",
+            "especie" = EXCLUDED."especie",
             "status" = EXCLUDED."status",
             "inicio" = EXCLUDED."inicio",
             "fim" = EXCLUDED."fim",

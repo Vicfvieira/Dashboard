@@ -108,6 +108,14 @@ describe("cliente do Pelagem", () => {
     expect(r.motivos.join(" ")).toContain("clienteHash");
   });
 
+  it("lê a espécie quando a API envia e aceita respostas antigas sem o campo", async () => {
+    const { f } = fetchSimulado([
+      json({ dados: [agendamento("gato", { especie: "GATO" }), agendamento("antigo")], paginacao: { pagina: 1, porPagina: 100, total: 2, totalPaginas: 1 } }),
+    ]);
+    const r = await buscarAgendamentos(CONFIG, { fetch: f, ...semEspera });
+    expect(r.agendamentos.map((a) => [a.id, a.especie])).toEqual([["gato", "GATO"], ["antigo", null]]);
+  });
+
   it("remove duplicatas entre páginas (paginação por offset)", async () => {
     const pagina = (n: number, ids: string[]) => json({ dados: ids.map((id) => agendamento(id)), paginacao: { pagina: n, porPagina: 2, total: 4, totalPaginas: 2 } });
     const { f } = fetchSimulado([pagina(1, ["a", "b"]), pagina(2, ["b", "c"])]);

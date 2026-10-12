@@ -26,6 +26,8 @@ export const agendamentoApi = z.object({
   clienteHash: z.string().regex(/^[0-9a-f]{64}$/, "clienteHash precisa ser SHA-256 hexadecimal"),
   servico: z.object({ slug: z.string().min(1).max(80), nome: z.string().min(1).max(120) }),
   porte: z.enum(["P", "M", "G"]),
+  /** Adicionada à API do Pelagem depois; ausente em respostas antigas vira null. */
+  especie: z.enum(["CACHORRO", "GATO"]).nullish().transform((v) => v ?? null),
   status: z.enum(["AGENDADO", "CONCLUIDO", "CANCELADO"]),
   inicio: instante,
   fim: instante,
