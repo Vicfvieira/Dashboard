@@ -33,6 +33,7 @@
   /* Marcas */
   --pelagem: #e8833a;
   --lirio: #d8b4a6;
+  --primary-ink: #6d28d9; /* texto roxo com contraste AA sobre fundo claro e cards */
   --pelagem-ink: #9a4a10; /* texto da marca com contraste AA sobre fundo claro */
   --lirio-ink: #8a5444;
 
@@ -86,6 +87,7 @@
   --input: #2c2c38;
   --ring: #a78bfa;
 
+  --primary-ink: #c4b5fd;
   --pelagem-ink: #f0a467;
   --lirio-ink: #e3c6bb;
 
@@ -136,6 +138,7 @@
   --color-ring: var(--ring);
   --color-pelagem: var(--pelagem);
   --color-lirio: var(--lirio);
+  --color-primary-ink: var(--primary-ink);
   --color-pelagem-ink: var(--pelagem-ink);
   --color-lirio-ink: var(--lirio-ink);
   --color-serie-pelagem: var(--serie-pelagem);
@@ -213,4 +216,15 @@
 }
 .leaflet-tooltip.mercado-dica::before {
   display: none;
+}
+
+/* Cartão de destino de um link com âncora (insights): realce breve. */
+[data-ancorado] {
+  box-shadow: 0 0 0 2px var(--ring);
+  transition: box-shadow 0.6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-ancorado] {
+    transition: none;
+  }
 }

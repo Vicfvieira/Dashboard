@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import {
   columnFilteringFeature,
   createColumnHelper,
@@ -21,6 +21,7 @@ import { registrarExportacao } from "@/app/actions/exportacao";
 import { baixarCsv, type ColunaTabela } from "@/components/graficos/exportar";
 import { Segmentado } from "@/components/graficos/segmentado";
 import { usePainel } from "@/components/painel/contexto";
+import { useRolarSeAncora } from "@/components/painel/use-ancora";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ClienteInativo } from "@/lib/dados/pelagem";
@@ -127,6 +128,8 @@ const NUMERICAS = new Set(["diasSemVoltar", "atendimentos", "gastoTotal"]);
  */
 export function TabelaInativos({ clientes, podeVerFinanceiro, recurso }: { clientes: ClienteInativo[]; podeVerFinanceiro: boolean; recurso: string }) {
   const { usuario } = usePainel();
+  const secao = useRef<HTMLElement>(null);
+  useRolarSeAncora("clientes-inativos", secao);
   const [faixa, setFaixa] = useState<FaixaInatividade>("todos");
   const [exportando, iniciar] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
@@ -191,7 +194,7 @@ export function TabelaInativos({ clientes, podeVerFinanceiro, recurso }: { clien
   }
 
   return (
-    <section aria-labelledby="titulo-inativos" className="flex min-w-0 flex-col rounded-xl border border-border bg-card">
+    <section ref={secao} id="clientes-inativos" aria-labelledby="titulo-inativos" className="flex min-w-0 scroll-mt-20 flex-col rounded-xl border border-border bg-card">
       <header className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4">
         <div className="min-w-0">
           <h2 id="titulo-inativos" className="text-sm font-semibold">

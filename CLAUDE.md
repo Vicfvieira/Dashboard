@@ -75,6 +75,11 @@
   `GET /api/mercado/distrito/[slug]` (requirePermissionApi + Zod). Etapa 12: a CSP precisa liberar
   `*.tile.openstreetmap.org` em img-src. Grids com `<select>` precisam de `grid-cols-1`/`min-w-0` no
   celular (a largura intrínseca da opção mais longa estoura a página).
+- Insights (Etapa 10): regras puras em `src/lib/insights.ts` (11 regras, limites em `LIMITES`, também
+  exibidos na página), testes em `insights.test.ts`; contexto montado em `src/lib/dados/insights.ts` com os
+  mesmos carregadores das páginas de origem (o número da frase é o do gráfico). Links levam ao cartão de
+  origem: `CartaoGrafico` usa `recurso` como `id` e `useRolarSeAncora` rola até ele depois do streaming.
+  Texto roxo sobre card: use `text-primary-ink` (a primária pura não passa AA no escuro).
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de

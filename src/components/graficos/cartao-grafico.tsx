@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { BarChart3, Download, FileImage, FileSpreadsheet, Loader2, Table2 } from "lucide-react";
 import { registrarExportacao } from "@/app/actions/exportacao";
 import { usePainel } from "@/components/painel/contexto";
+import { useRolarSeAncora } from "@/components/painel/use-ancora";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatarInteiro, formatarMoeda, formatarPercentual } from "@/lib/formato";
@@ -57,6 +58,8 @@ export function CartaoGrafico({
   const [exportando, iniciar] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const areaGrafico = useRef<HTMLDivElement>(null);
+  const secao = useRef<HTMLElement>(null);
+  useRolarSeAncora(recurso, secao);
   const idTitulo = useId();
   const idDescricao = useId();
 
@@ -102,7 +105,7 @@ export function CartaoGrafico({
   }
 
   return (
-    <section aria-labelledby={idTitulo} aria-describedby={idDescricao} className={cn("flex min-w-0 flex-col rounded-xl border border-border bg-card", className)}>
+    <section ref={secao} id={recurso} aria-labelledby={idTitulo} aria-describedby={idDescricao} className={cn("flex min-w-0 scroll-mt-20 flex-col rounded-xl border border-border bg-card", className)}>
       <header className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4">
         <div className="min-w-0">
           <h2 id={idTitulo} className="text-sm font-semibold">{titulo}</h2>
