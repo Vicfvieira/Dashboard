@@ -2,7 +2,8 @@
  * Seed idempotente do Painelux. Pode rodar quantas vezes quiser:
  * - usuários: criados uma vez (a senha nunca é sobrescrita depois); papel e flags são reaplicados;
  * - distritos: upsert dos 96 distritos oficiais;
- * - fatos fictícios: chaves determinísticas + createMany skipDuplicates (nada duplica).
+ * - fatos fictícios: chaves determinísticas + createMany skipDuplicates (nada duplica), e só para
+ *   fontes ainda não sincronizadas (depois da primeira sincronização, valem os dados reais).
  *
  *   npm run db:seed
  */
@@ -83,6 +84,11 @@ async function seedDistritos() {
 }
 
 async function seedPelagem(agora: Date, inicio: Date) {
+  // Depois da primeira sincronização, os dados reais mandam: o seed não mistura fictícios com eles.
+  if ((await prisma.appointmentFact.count({ where: { origem: "API" } })) > 0) {
+    console.log("pelagem: já sincronizado com a API, fatos fictícios não foram gerados");
+    return { lidos: 0, gravados: 0 };
+  }
   const linhas = gerarAtendimentos({ agora, inicio, diasFuturos: DIAS_FUTUROS, totalClientes: CLIENTES_PELAGEM });
   const novos = await emLotes(linhas, (lote) =>
     prisma.appointmentFact.createMany({ data: lote.map((l) => ({ ...l, origem: "SEED" as const })), skipDuplicates: true }),
@@ -97,6 +103,10 @@ async function seedPelagem(agora: Date, inicio: Date) {
 }
 
 async function seedLirio(inicio: Date, hoje: Date) {
+  if ((await prisma.marketEventFact.count({ where: { origem: "API" } })) > 0) {
+    console.log("lírio: já sincronizado com a API, fatos fictícios não foram gerados");
+    return { lidos: 0, gravados: 0 };
+  }
   const oferta = gerarOferta({ inicio, hoje });
   const novaOferta = await emLotes(oferta, (lote) =>
     prisma.professionalStat.createMany({ data: lote.map((l) => ({ ...l, origem: "SEED" as const })), skipDuplicates: true }),

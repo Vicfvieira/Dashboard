@@ -11,7 +11,7 @@ export function CabecalhoPagina({ titulo, descricao, acoes, marca, className }: 
         </h1>
         {descricao && <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{descricao}</p>}
       </div>
-      {acoes && <div className="flex items-center gap-2">{acoes}</div>}
+      {acoes && <div className="ml-auto flex items-center gap-2">{acoes}</div>}
     </div>
   );
 }
