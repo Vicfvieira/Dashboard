@@ -27,6 +27,15 @@
   espécie (`especie` nulo nos dados sincronizados) e a da Lírio não tem granularidade por hora.
   Migrations: gere com `prisma migrate diff --from-empty|--from-migrations ... --script` (sem banco
   local); o build da Vercel aplica com `migrate deploy`. Seed remoto: Vercel Sandbox clonando o repo.
+- Layout (Etapa 4): shell em `src/app/(painel)/layout.tsx` (sessão lida dentro de `<Suspense>`);
+  matriz pura em `src/lib/permissoes.ts` (pode ir ao cliente), helpers de servidor em `rbac.ts`.
+  Filtros globais: `src/lib/filtros.ts` (URL canônica, omite padrões) + `useFiltros()`. Mapa de
+  navegação e filtros por página: `src/lib/navegacao.ts`. Páginas de dados: `searchParams` →
+  `lerFiltros` → `intervaloAtual`/`intervaloAnterior` → consultas em `src/lib/dados/`.
+- Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
+  dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
+  DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de
+  `/opt/pw-browsers/chromium-1194`. Não use `pkill -f` com o padrão do próprio comando.
 - Next.js 16 com `cacheComponents`: leia `node_modules/next/dist/docs/` antes de usar APIs novas.
 
 ---

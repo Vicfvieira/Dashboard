@@ -7,7 +7,7 @@ import { sair } from "@/app/actions/sessao";
 import { SeletorTema } from "@/components/tema/seletor-tema";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { itemDaRota } from "@/lib/navegacao";
+import { NOME_GRUPO, itemDaRota } from "@/lib/navegacao";
 import { NOME_PAPEL } from "@/lib/permissoes";
 import { usePainel } from "./contexto";
 import { FiltrosGlobais } from "./filtros-globais";
@@ -70,9 +70,13 @@ export function Topbar() {
         <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMenuMovelAberto(true)} aria-label="Abrir menu">
           <Menu />
         </Button>
-        <div className="min-w-0 shrink-0">
-          <p className="truncate text-sm font-semibold tracking-tight">{item?.rotulo ?? "Painelux"}</p>
-        </div>
+        <nav aria-label="Trilha" className="min-w-0 shrink-0">
+          <ol className="flex items-center gap-1.5 text-sm">
+            {item && <li className="hidden text-muted-foreground lg:block">{NOME_GRUPO[item.grupo]}</li>}
+            {item && <li className="hidden text-muted-foreground/60 lg:block" aria-hidden="true">/</li>}
+            <li className="truncate font-medium" aria-current="page">{item?.rotulo ?? "Painelux"}</li>
+          </ol>
+        </nav>
         <div className="hidden min-w-0 flex-1 justify-center md:flex">
           {item?.filtros.periodo && <FiltrosGlobais comProduto={item.filtros.produto} />}
         </div>

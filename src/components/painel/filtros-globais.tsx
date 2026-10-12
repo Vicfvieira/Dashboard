@@ -21,7 +21,7 @@ export function FiltrosGlobais({ comProduto }: { comProduto: boolean }) {
   const idGrupo = useId();
 
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-2">
+    <div className="flex min-w-0 flex-nowrap items-center gap-2">
       <div role="radiogroup" aria-label="Período" className="relative flex items-center rounded-lg border border-border bg-card p-0.5">
         {FIXOS.map((p) => {
           const ativo = filtros.periodo === p;
@@ -94,7 +94,7 @@ export function FiltrosGlobais({ comProduto }: { comProduto: boolean }) {
         </DropdownMenu>
       )}
 
-      <p className="hidden items-center gap-1.5 text-xs text-muted-foreground tabular-nums xl:flex" aria-live="polite">
+      <p className="hidden shrink-0 items-center gap-1.5 text-xs text-muted-foreground tabular-nums 2xl:flex" aria-live="polite">
         {atualizando && <Loader2 className="size-3 animate-spin" aria-hidden="true" />}
         {descreverIntervalo(intervalo)}
       </p>
