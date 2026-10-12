@@ -64,6 +64,17 @@
   `src/components/graficos/dica.tsx`. Seed por hora (`gerarBuscasPorHora`) soma exatamente o total do dia
   dos eventos, com o perfil de horas medido na Lírio real. Produção da Lírio: projeto Vercel publica
   manualmente a partir do branch `ccr-3e9e041e-8d1ko9` (redeploy com `target: production`).
+- Mapa de mercado (Etapa 9): índice de demanda exibido como `indiceDemandaRelativo` (buscas por
+  profissional ativa ÷ a mesma razão da cidade na mesma categoria; 1 = média), porque o bruto cresce com
+  o tamanho do período e os limites 1,5/0,5 perderiam o sentido. Lógica pura em `src/lib/mercado.ts`
+  (faixas do índice, quantis para métricas sequenciais, média da região, categorias do distrito); cores
+  por tema em `src/lib/mercado-cores.ts` (validadas; Leaflet desenha SVG com atributos, sem var CSS).
+  Leaflet só no cliente (`next/dynamic`, GeoJSON por `import()`); o tema só é lido depois de montar
+  (senão a hidratação mantém cores do servidor em `style`). Categoria, métrica e distrito ficam na URL
+  via `history.replaceState` (sem nova renderização no servidor). Detalhe mensal em
+  `GET /api/mercado/distrito/[slug]` (requirePermissionApi + Zod). Etapa 12: a CSP precisa liberar
+  `*.tile.openstreetmap.org` em img-src. Grids com `<select>` precisam de `grid-cols-1`/`min-w-0` no
+  celular (a largura intrínseca da opção mais longa estoura a página).
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de

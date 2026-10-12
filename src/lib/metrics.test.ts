@@ -7,6 +7,7 @@ import {
   granularidade,
   indexar,
   indiceDemanda,
+  indiceDemandaRelativo,
   inicioDaSemana,
   maioresMovimentos,
   taxaCancelamento,
@@ -58,6 +59,17 @@ describe("Lírio", () => {
     expect(classificarDemanda(0.49)).toBe("excesso-oferta");
     expect(classificarDemanda(indiceDemanda(4, 0))).toBe("sem-oferta");
     expect(classificarDemanda(indiceDemanda(0, 0))).toBe("sem-dados");
+  });
+});
+
+describe("índice de demanda relativo", () => {
+  it("compara buscas por profissional com a média da cidade", () => {
+    // Cidade: 6.000 buscas para 400 profissionais (15 por profissional).
+    expect(indiceDemandaRelativo(63, 2, 6000, 400)).toBeCloseTo(2.1);
+    expect(indiceDemandaRelativo(30, 4, 6000, 400)).toBeCloseTo(0.5);
+    expect(indiceDemandaRelativo(5, 0, 6000, 400)).toBe(Number.POSITIVE_INFINITY);
+    expect(indiceDemandaRelativo(0, 0, 6000, 400)).toBeNull();
+    expect(indiceDemandaRelativo(10, 2, 0, 400)).toBeNull();
   });
 });
 

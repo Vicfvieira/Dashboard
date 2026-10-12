@@ -176,3 +176,41 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── Mapa de mercado (Leaflet) ────────────────────────────────────────────── */
+.leaflet-container.mercado-mapa {
+  background: var(--muted);
+  font-family: inherit;
+}
+/* Tiles do OSM dessaturados: o fundo não compete com as cores dos dados. */
+.mercado-mapa .leaflet-tile-pane {
+  filter: grayscale(1) brightness(1.06) contrast(0.85);
+}
+.mercado-mapa-escuro .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.75) contrast(0.85);
+}
+.leaflet-container.mercado-mapa .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+  color: var(--muted-foreground);
+}
+.leaflet-container.mercado-mapa .leaflet-control-attribution a {
+  color: var(--foreground);
+}
+.leaflet-container.mercado-mapa .leaflet-bar a {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.leaflet-tooltip.mercado-dica {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
+  font-size: 12px;
+  padding: 6px 8px;
+  white-space: pre-line;
+}
+.leaflet-tooltip.mercado-dica::before {
+  display: none;
+}

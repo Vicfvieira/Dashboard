@@ -76,6 +76,20 @@ export function indiceDemanda(buscas: number, ativas: number): number | null {
   return buscas / ativas;
 }
 
+/**
+ * Índice de demanda comparável entre períodos e categorias: buscas por profissional ativa do
+ * recorte dividido pelo mesmo número da referência (cidade inteira, mesma categoria). 1 = a pressão
+ * média da cidade; 2,1 = 2,1× mais buscas por profissional do que a média. Sem essa normalização, o
+ * valor cresce com o tamanho do período (30 dias de buscas sobre a oferta de um dia) e os limites
+ * de 1,5 e 0,5 perderiam o sentido.
+ */
+export function indiceDemandaRelativo(buscas: number, ativas: number, buscasReferencia: number, ativasReferencia: number): number | null {
+  const bruto = indiceDemanda(buscas, ativas);
+  const referencia = indiceDemanda(buscasReferencia, ativasReferencia);
+  if (bruto === null || referencia === null || referencia === 0 || !Number.isFinite(referencia)) return null;
+  return Number.isFinite(bruto) ? bruto / referencia : Number.POSITIVE_INFINITY;
+}
+
 export type SituacaoDemanda = "sem-oferta" | "reprimida" | "equilibrada" | "excesso-oferta" | "sem-dados";
 
 /** Acima de 1,5 é demanda reprimida; abaixo de 0,5, excesso de oferta. */
