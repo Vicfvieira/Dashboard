@@ -32,6 +32,14 @@
   Filtros globais: `src/lib/filtros.ts` (URL canônica, omite padrões) + `useFiltros()`. Mapa de
   navegação e filtros por página: `src/lib/navegacao.ts`. Páginas de dados: `searchParams` →
   `lerFiltros` → `intervaloAtual`/`intervaloAnterior` → consultas em `src/lib/dados/`.
+- Sincronização (Etapa 5): `src/lib/sync/` — `http.ts` (x-api-key, timeout, 3 tentativas com espera
+  500 ms → 1,5 s; repete só rede/429/5xx), `esquemas.ts` (Zod por item; inválidos contam como
+  rejeitados), `clientes.ts` (Pelagem: histórico completo paginado, 100/pág, teto 50 págs; Lírio:
+  /eventos em janelas de 92 dias por 365 dias + /profissionais), `gravar.ts` (INSERT ... SELECT FROM
+  unnest ON CONFLICT DO UPDATE, parametrizado; no fim apaga, na mesma transação, o que não foi tocado
+  dentro do intervalo coberto: fictícios do seed e registros removidos na origem), `executar.ts`
+  (SyncRun, trava de execução simultânea, auditoria SINCRONIZACAO). Disparos: cron diário
+  `/api/cron/sync` (Bearer CRON_SECRET) e Server Action `sincronizarAgora` em /configuracoes (ADMIN).
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de

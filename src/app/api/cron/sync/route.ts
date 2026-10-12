@@ -1,17 +1,23 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
+import { sincronizar } from "@/lib/sync/executar";
 
-// Placeholder protegido: a sincronização real é implementada na Etapa 5.
-function isAuthorized(header: string | null): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !header) return false;
-  const expected = Buffer.from(`Bearer ${secret}`);
-  const received = Buffer.from(header);
-  return expected.length === received.length && timingSafeEqual(expected, received);
+// A Vercel Cron chama esta rota diariamente (vercel.json) com Authorization: Bearer CRON_SECRET.
+export const maxDuration = 60;
+
+/** Compara em tempo constante (hash de tamanho fixo, sem vazar o comprimento do segredo). */
+function autorizado(header: string | null): boolean {
+  const segredo = process.env.CRON_SECRET;
+  if (!segredo || segredo.length < 16 || !header) return false;
+  const esperado = createHash("sha256").update(`Bearer ${segredo}`).digest();
+  const recebido = createHash("sha256").update(header).digest();
+  return timingSafeEqual(esperado, recebido);
 }
 
 export async function GET(request: Request) {
-  if (!isAuthorized(request.headers.get("authorization"))) {
-    return Response.json({ error: "Não autorizado" }, { status: 401 });
+  if (!autorizado(request.headers.get("authorization"))) {
+    return Response.json({ erro: "Não autorizado." }, { status: 401 });
   }
-  return Response.json({ status: "pendente", detalhe: "Sincronização disponível a partir da Etapa 5." }, { status: 202 });
+  const resultados = await sincronizar("CRON", null);
+  const ok = resultados.every((r) => r.status === "SUCESSO" || r.status === "PARCIAL" || r.status === "IGNORADA");
+  return Response.json({ resultados }, { status: ok ? 200 : 502, headers: { "Cache-Control": "no-store" } });
 }
