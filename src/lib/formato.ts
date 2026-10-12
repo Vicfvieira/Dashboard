@@ -6,12 +6,6 @@ export const formatarInteiro = (n: number) => inteiro.format(n);
 export const formatarMoeda = (centavos: number) => moeda.format(centavos / 100);
 export const formatarPercentual = (fracao: number) => percentual.format(fracao);
 
-/** Variação relativa entre períodos; null quando não há base de comparação. */
-export function variacao(atual: number, anterior: number): number | null {
-  if (anterior === 0) return null;
-  return (atual - anterior) / anterior;
-}
-
 /** "+12,4%" / "−3,1%" (sinal de menos tipográfico). */
 export function formatarVariacao(v: number): string {
   const texto = percentual.format(Math.abs(v));

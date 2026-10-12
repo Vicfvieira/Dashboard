@@ -40,6 +40,13 @@
   dentro do intervalo coberto: fictícios do seed e registros removidos na origem), `executar.ts`
   (SyncRun, trava de execução simultânea, auditoria SINCRONIZACAO). Disparos: cron diário
   `/api/cron/sync` (Bearer CRON_SECRET) e Server Action `sincronizarAgora` em /configuracoes (ADMIN).
+- Visão geral (Etapa 6): métricas puras em `src/lib/metrics.ts` (fonte única das definições);
+  dados em `src/lib/dados/visao-geral.ts` (SQL agregado no fuso de SP). Gráficos: sempre dentro de
+  `CartaoGrafico` (título, descrição, "Ver como tabela", exportação PNG/CSV com auditoria via
+  `registrarExportacao`; o PNG é preparado ao abrir o menu para o download ser síncrono no clique).
+  Nunca dois eixos Y: duas grandezas = índice (100 = média) ou gráficos separados. Cores de série das
+  marcas validadas pelo dataviz: `--serie-pelagem #D9772F` e `--serie-lirio #A85C86` (as cores
+  puras das marcas falham como série). Diário até 31 dias, semanal acima, só semanas completas.
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de

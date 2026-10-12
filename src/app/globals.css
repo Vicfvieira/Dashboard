@@ -36,6 +36,11 @@
   --pelagem-ink: #9a4a10; /* texto da marca com contraste AA sobre fundo claro */
   --lirio-ink: #8a5444;
 
+  /* Séries das marcas nos gráficos: validadas (CVD ΔE 17,1, contraste ≥ 3:1) em #FFFFFF e #1A1A23.
+     As cores puras das marcas (#E8833A, #D8B4A6) ficam para identidade (pontos, selos), não para séries. */
+  --serie-pelagem: #d9772f;
+  --serie-lirio: #a85c86;
+
   /* Séries de gráficos */
   --chart-1: #7c3aed;
   --chart-2: #e8833a;
@@ -128,6 +133,8 @@
   --color-lirio: var(--lirio);
   --color-pelagem-ink: var(--pelagem-ink);
   --color-lirio-ink: var(--lirio-ink);
+  --color-serie-pelagem: var(--serie-pelagem);
+  --color-serie-lirio: var(--serie-lirio);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
