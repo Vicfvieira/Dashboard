@@ -1,7 +1,8 @@
 // Painelux — schema Prisma (PostgreSQL na Neon).
 // DATABASE_URL: conexão com pooling (PgBouncer), usada pela aplicação em runtime.
 // DIRECT_URL: conexão direta, usada pelo Prisma Migrate.
-// Os modelos de domínio são adicionados na Etapa 2.
+// Nenhuma tabela guarda dados pessoais de clientes: o Pelagem envia só um hash anônimo do cliente
+// e a Lírio só números agregados.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,4 +12,237 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+// ─── Acesso e auditoria ───────────────────────────────────────────────────────
+
+enum Papel {
+  ADMIN
+  GESTOR
+  ATENDENTE
+}
+
+model User {
+  id               String    @id @default(cuid())
+  nome             String
+  email            String    @unique
+  senhaHash        String
+  papel            Papel
+  ativo            Boolean   @default(true)
+  /// Usuário de demonstração: nenhuma escrita, mesmo com papel GESTOR.
+  somenteLeitura   Boolean   @default(false)
+  tentativasFalhas Int       @default(0)
+  bloqueadoAte     DateTime? @db.Timestamptz(3)
+  ultimoLoginEm    DateTime? @db.Timestamptz(3)
+  /// Tour guiado já visto (usuário demo).
+  tourConcluidoEm  DateTime? @db.Timestamptz(3)
+  criadoEm         DateTime  @default(now()) @db.Timestamptz(3)
+  atualizadoEm     DateTime  @updatedAt @db.Timestamptz(3)
+
+  auditLogs AuditLog[]
+  syncRuns  SyncRun[]
+}
+
+enum AcaoAuditoria {
+  LOGIN_SUCESSO
+  LOGIN_FALHA
+  LOGIN_BLOQUEADO
+  LOGOUT
+  ACESSO_NEGADO
+  USUARIO_CRIADO
+  USUARIO_ATUALIZADO
+  USUARIO_DESATIVADO
+  USUARIO_REATIVADO
+  SENHA_REDEFINIDA
+  SINCRONIZACAO
+  EXPORTACAO
+}
+
+model AuditLog {
+  id        String        @id @default(cuid())
+  criadoEm  DateTime      @default(now()) @db.Timestamptz(3)
+  acao      AcaoAuditoria
+  sucesso   Boolean       @default(true)
+  /// Quem fez a ação (null em tentativas de login com e-mail inexistente).
+  usuarioId String?
+  /// E-mail informado no login, guardado mesmo quando o usuário não existe.
+  email     String?
+  ip        String?
+  userAgent String?
+  /// Recurso afetado, ex.: "user:clx..." ou "export:pelagem-clientes-inativos".
+  alvo      String?
+  detalhes  Json?
+
+  usuario User? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@index([criadoEm(sort: Desc)])
+  @@index([acao, criadoEm])
+  @@index([usuarioId, criadoEm])
+}
+
+// ─── Sincronização ────────────────────────────────────────────────────────────
+
+enum Fonte {
+  PELAGEM
+  LIRIO
+}
+
+enum GatilhoSync {
+  MANUAL
+  CRON
+  SEED
+}
+
+enum StatusSync {
+  EXECUTANDO
+  SUCESSO
+  PARCIAL
+  ERRO
+}
+
+model SyncRun {
+  id                String      @id @default(cuid())
+  fonte             Fonte
+  gatilho           GatilhoSync
+  status            StatusSync  @default(EXECUTANDO)
+  iniciadoEm        DateTime    @default(now()) @db.Timestamptz(3)
+  finalizadoEm      DateTime?   @db.Timestamptz(3)
+  duracaoMs         Int?
+  paginas           Int         @default(0)
+  registrosLidos    Int         @default(0)
+  registrosGravados Int         @default(0)
+  tentativas        Int         @default(0)
+  erro              String?
+  detalhes          Json?
+  disparadoPorId    String?
+
+  disparadoPor User? @relation(fields: [disparadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([fonte, iniciadoEm(sort: Desc)])
+}
+
+/// De onde veio a linha de fato: dados fictícios do seed ou sincronização com a API.
+enum OrigemDado {
+  SEED
+  API
+}
+
+// ─── Pelagem Studio ───────────────────────────────────────────────────────────
+
+enum Porte {
+  P
+  M
+  G
+}
+
+enum Especie {
+  CACHORRO
+  GATO
+}
+
+enum StatusAtendimento {
+  AGENDADO
+  CONCLUIDO
+  CANCELADO
+}
+
+model AppointmentFact {
+  id                   String            @id @default(cuid())
+  /// id do agendamento no Pelagem (chave de idempotência do upsert).
+  idOrigem             String            @unique
+  /// Hash anônimo do cliente, calculado pelo Pelagem com sal próprio.
+  clienteHash          String
+  servicoSlug          String
+  servicoNome          String
+  porte                Porte
+  /// A API do Pelagem ainda não envia a espécie; null quando desconhecida.
+  especie              Especie?
+  status               StatusAtendimento
+  inicio               DateTime          @db.Timestamptz(3)
+  fim                  DateTime          @db.Timestamptz(3)
+  duracaoMinutos       Int
+  valorServicoCentavos Int
+  taxaTaxiCentavos     Int               @default(0)
+  totalCentavos        Int
+  zonaTaxi             String?
+  criadoEmOrigem       DateTime          @db.Timestamptz(3)
+  canceladoEmOrigem    DateTime?         @db.Timestamptz(3)
+  origem               OrigemDado
+  sincronizadoEm       DateTime          @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([inicio])
+  @@index([status, inicio])
+  @@index([clienteHash, inicio])
+  @@index([servicoSlug, inicio])
+}
+
+// ─── Lírio ────────────────────────────────────────────────────────────────────
+
+enum Regiao {
+  centro
+  oeste
+  sul
+  norte
+  leste
+}
+
+/// Referência dos 96 distritos oficiais (mesmos slugs da Lírio e do GeoJSON em src/data).
+model District {
+  slug              String @id
+  nome              String
+  sigla             String @unique
+  codigo            Int    @unique
+  subprefeituraSlug String
+  subprefeitura     String
+  regiao            Regiao
+  lat               Float
+  lng               Float
+  areaKm2           Float
+
+  professionalStats ProfessionalStat[]
+  marketEvents      MarketEventFact[]
+
+  @@index([regiao])
+}
+
+/// Foto (snapshot) da oferta: profissionais ativas por distrito e categoria numa data.
+model ProfessionalStat {
+  id             String     @id @default(cuid())
+  data           DateTime   @db.Date
+  distritoSlug   String
+  regiao         Regiao
+  /// Slug da categoria da Lírio (ex.: "lash-designer").
+  categoria      String
+  ativas         Int
+  verificadas    Int        @default(0)
+  origem         OrigemDado
+  sincronizadoEm DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+
+  distrito District @relation(fields: [distritoSlug], references: [slug])
+
+  @@unique([data, distritoSlug, categoria])
+  @@index([categoria, data])
+}
+
+/// Demanda agregada por dia, distrito e categoria. Distrito ou categoria nulos = busca sem esse filtro.
+model MarketEventFact {
+  id               String     @id @default(cuid())
+  /// "AAAA-MM-DD|distrito|categoria" com "-" para nulos (chave de idempotência do upsert).
+  chave            String     @unique
+  dia              DateTime   @db.Date
+  distritoSlug     String?
+  regiao           Regiao?
+  categoria        String?
+  buscas           Int        @default(0)
+  visualizacoes    Int        @default(0)
+  cliquesWhatsapp  Int        @default(0)
+  cliquesInstagram Int        @default(0)
+  origem           OrigemDado
+  sincronizadoEm   DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+
+  distrito District? @relation(fields: [distritoSlug], references: [slug])
+
+  @@index([dia])
+  @@index([distritoSlug, categoria, dia])
+  @@index([categoria, dia])
 }

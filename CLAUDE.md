@@ -21,6 +21,12 @@
     distrito, categoria, buscas, visualizacoes, cliquesWhatsapp, cliquesInstagram }] }`.
   - A rede do ambiente de desenvolvimento bloqueia `*.vercel.app`, APIs da Vercel/Neon e a porta 5432:
     use os conectores (MCP) da Neon e da Vercel; testes HTTP externos via Vercel Sandbox.
+- Dados (Etapa 2): `src/data/sp-geo.ts` e `sp-distritos.geo.json` vêm da Lírio (mesmos slugs). O seed
+  (`prisma/seed.ts` + geradores puros em `src/lib/seed/`) é determinístico por chave e idempotente;
+  linhas fictícias têm `origem = SEED`, as sincronizadas `origem = API`. A API do Pelagem não envia
+  espécie (`especie` nulo nos dados sincronizados) e a da Lírio não tem granularidade por hora.
+  Migrations: gere com `prisma migrate diff --from-empty|--from-migrations ... --script` (sem banco
+  local); o build da Vercel aplica com `migrate deploy`. Seed remoto: Vercel Sandbox clonando o repo.
 - Next.js 16 com `cacheComponents`: leia `node_modules/next/dist/docs/` antes de usar APIs novas.
 
 ---
