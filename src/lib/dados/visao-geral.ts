@@ -138,7 +138,7 @@ async function candidatosPelagem(atual: Intervalo, anterior: Intervalo): Promise
 
 // ─── Visão geral ──────────────────────────────────────────────────────────────
 
-export type ChaveKpi = "faturamento" | "atendimentos" | "ticket" | "buscas" | "cliques" | "oferta" | "cancelamento" | "retorno" | "inativos" | "atendidos" | "recorrentes" | "recuperavel";
+export type ChaveKpi = "faturamento" | "atendimentos" | "ticket" | "buscas" | "cliques" | "oferta" | "cancelamento" | "retorno" | "inativos" | "atendidos" | "recorrentes" | "recuperavel" | "visualizacoes" | "taxaVisualizacao" | "taxaContato";
 
 export interface Kpi {
   chave: ChaveKpi;

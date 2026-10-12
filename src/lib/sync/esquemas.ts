@@ -74,6 +74,18 @@ export const eventoApi = z.object({
 });
 export type EventoApi = z.infer<typeof eventoApi>;
 
+export const respostaHorarios = z.object({
+  periodo: z.object({ de: dataIso, ate: dataIso }),
+  itens: z.array(z.unknown()),
+});
+
+export const horaApi = z.object({
+  dia: dataIso,
+  hora: z.number().int().min(0).max(23),
+  buscas: inteiroNaoNegativo,
+});
+export type HoraApi = z.infer<typeof horaApi>;
+
 /** Valida item a item e devolve os válidos e uma amostra dos motivos de rejeição. */
 export function validarItens<T>(itens: readonly unknown[], esquema: z.ZodType<T>): { validos: T[]; rejeitados: number; motivos: string[] } {
   const validos: T[] = [];

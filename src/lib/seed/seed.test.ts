@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sorteio } from "./aleatorio";
 import { diaDaSemana, diaSP, horarioSP, somarDias } from "./datas";
-import { chaveEvento, gerarEventos, gerarOferta } from "./lirio";
+import { chaveEvento, gerarBuscasPorHora, gerarEventos, gerarOferta } from "./lirio";
 import { DIAS_ABERTOS, gerarAtendimentos } from "./pelagem";
 
 const agora = new Date("2026-10-12T15:00:00.000Z");
@@ -90,6 +90,20 @@ describe("seed da Lírio", () => {
     }
     const total = eventos.reduce((t, e) => ({ v: t.v + e.visualizacoes, w: t.w + e.cliquesWhatsapp }), { v: 0, w: 0 });
     expect(total.w).toBeLessThan(total.v);
+  });
+
+  it("distribui as buscas de cada dia pelas horas sem perder nem inventar buscas", () => {
+    const horas = gerarBuscasPorHora(eventos);
+    const dia = (d: Date) => d.toISOString().slice(0, 10);
+    const somaEventos = new Map<string, number>();
+    for (const e of eventos) somaEventos.set(dia(e.dia), (somaEventos.get(dia(e.dia)) ?? 0) + e.buscas);
+    const somaHoras = new Map<string, number>();
+    for (const h of horas) somaHoras.set(dia(h.dia), (somaHoras.get(dia(h.dia)) ?? 0) + h.buscas);
+    for (const [d, n] of somaEventos) expect(somaHoras.get(d) ?? 0).toBe(n);
+    expect(horas.every((h) => h.hora >= 0 && h.hora <= 23 && h.buscas > 0)).toBe(true);
+    // Pico da noite maior que a madrugada.
+    const naHora = (h: number) => horas.filter((x) => x.hora === h).reduce((t, x) => t + x.buscas, 0);
+    expect(naHora(20)).toBeGreaterThan(naHora(3) * 10);
   });
 
   it("planta demanda reprimida em Vila Sônia × Lash designer", () => {

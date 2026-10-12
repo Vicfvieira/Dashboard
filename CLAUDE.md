@@ -23,8 +23,9 @@
     use os conectores (MCP) da Neon e da Vercel; testes HTTP externos via Vercel Sandbox.
 - Dados (Etapa 2): `src/data/sp-geo.ts` e `sp-distritos.geo.json` vêm da Lírio (mesmos slugs). O seed
   (`prisma/seed.ts` + geradores puros em `src/lib/seed/`) é determinístico por chave e idempotente;
-  linhas fictícias têm `origem = SEED`, as sincronizadas `origem = API`. A API do Pelagem não envia
-  espécie (`especie` nulo nos dados sincronizados) e a da Lírio não tem granularidade por hora.
+  linhas fictícias têm `origem = SEED`, as sincronizadas `origem = API`. A API do Pelagem envia
+  `especie` (CACHORRO/GATO) desde a Etapa 6; a da Lírio tem `/horarios` (buscas por dia e hora) desde a
+  Etapa 8, gravado em `SearchHourFact` (sincronização segue sem ele se a rota responder 404).
   Migrations: gere com `prisma migrate diff --from-empty|--from-migrations ... --script` (sem banco
   local); o build da Vercel aplica com `migrate deploy`. Seed remoto: Vercel Sandbox clonando o repo.
 - Layout (Etapa 4): shell em `src/app/(painel)/layout.tsx` (sessão lida dentro de `<Suspense>`);
@@ -55,6 +56,14 @@
   escopo do módulo); CSV de hashes só baixa depois de `registrarExportacao` responder ok. Rótulos em
   `src/lib/rotulos-pelagem.ts`; cor de gato `--serie-gato #3E7CB1`. KPIs aceitam `percentual`
   (variação em p.p.), `menorMelhor` e `notaComparacao`. `Segmentado` em `src/components/graficos/`.
+- Lírio (Etapa 8): dados em `src/lib/dados/lirio.ts`; regras puras em `src/lib/lirio-analise.ts`
+  (funil com taxa e queda entre etapas — a taxa de visualização passa de 100%, então não é "queda" —,
+  crescimento com base mínima de 30 buscas, ranking por taxa de contato com mínimo de 30
+  visualizações, picos e janela de 3 h). `MapaCalor` genérico em `src/components/graficos/mapa-calor.tsx`
+  (opacidade máx. 0,85; texto forte por token `--calor-texto-lirio`). Peças Recharts comuns em
+  `src/components/graficos/dica.tsx`. Seed por hora (`gerarBuscasPorHora`) soma exatamente o total do dia
+  dos eventos, com o perfil de horas medido na Lírio real. Produção da Lírio: projeto Vercel publica
+  manualmente a partir do branch `ccr-3e9e041e-8d1ko9` (redeploy com `target: production`).
 - Teste visual local: PostgreSQL 16 em `/usr/lib/postgresql/16/bin` (rodar como usuário `postgres`,
   dados em /var/tmp, porta 5433), `migrate deploy` + seed com senhas locais, `next start` com
   DATABASE_URL/DIRECT_URL/AUTH_SECRET locais, e playwright-core (fora do projeto) com o Chromium de

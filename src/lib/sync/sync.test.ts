@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buscarAgendamentos, buscarEventos, buscarOferta, dividirEmJanelas, MAX_PAGINAS_PELAGEM } from "./clientes";
+import { buscarAgendamentos, buscarEventos, buscarHorarios, buscarOferta, dividirEmJanelas, MAX_PAGINAS_PELAGEM } from "./clientes";
 import { ErroIntegracao, esperaDaTentativa, requisitarJson, type Fetch } from "./http";
 
 const CONFIG = { baseUrl: "https://api.exemplo.dev", chave: "chave-de-teste-1234567890" };
@@ -173,6 +173,27 @@ describe("cliente da Lírio", () => {
     const r = await buscarEventos(CONFIG, { de: "2025-10-13", ate: "2026-10-12" }, { fetch: f, ...semEspera });
     expect(chamadas).toHaveLength(4);
     expect(r.paginas).toBe(4);
+  });
+
+  it("lê buscas por dia e hora e rejeita hora fora de 0 a 23", async () => {
+    const itens = [
+      { dia: "2026-10-01", hora: 20, buscas: 14 },
+      { dia: "2026-10-01", hora: 24, buscas: 1 },
+      { dia: "2026-10-01", hora: 9, buscas: -2 },
+    ];
+    const { f, chamadas } = fetchSimulado([json({ periodo: { de: "2026-09-01", ate: "2026-10-01" }, itens })]);
+    const r = await buscarHorarios(CONFIG, { de: "2026-09-01", ate: "2026-10-01" }, { fetch: f, ...semEspera });
+    expect(new URL(chamadas[0]?.url ?? "").pathname).toBe("/api/integracao/horarios");
+    expect(r.disponivel).toBe(true);
+    expect(r.horas).toEqual([{ dia: "2026-10-01", hora: 20, buscas: 14 }]);
+    expect(r.rejeitados).toBe(2);
+  });
+
+  it("segue sem horários quando a Lírio ainda não publica /horarios", async () => {
+    const { f } = fetchSimulado([new Response("não encontrado", { status: 404 })]);
+    const r = await buscarHorarios(CONFIG, { de: "2026-09-01", ate: "2026-10-01" }, { fetch: f, ...semEspera });
+    expect(r.disponivel).toBe(false);
+    expect(r.horas).toEqual([]);
   });
 
   it("lê a oferta atual por distrito e categoria", async () => {

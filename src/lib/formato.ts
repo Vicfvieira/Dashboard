@@ -17,8 +17,10 @@ export function formatarVariacao(v: number): string {
 
 /** Diferença em pontos percentuais: "+2,1 p.p." / "−0,4 p.p.". */
 export function formatarPontos(p: number): string {
-  const texto = Math.abs(p).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
-  return `${p > 0 ? "+" : p < 0 ? "−" : ""}${texto} p.p.`;
+  // Arredonda antes do sinal: −0,02 p.p. vira "0 p.p.", não "−0 p.p.".
+  const r = Math.round(p * 10) / 10;
+  const texto = Math.abs(r).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+  return `${r > 0 ? "+" : r < 0 ? "−" : ""}${texto} p.p.`;
 }
 
 const dataHoraSP = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });

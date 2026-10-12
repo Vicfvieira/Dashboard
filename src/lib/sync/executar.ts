@@ -4,8 +4,8 @@ import { z } from "zod";
 import { registrarAuditoria } from "@/lib/auditoria";
 import { hojeSP, somarDiasIso } from "@/lib/filtros";
 import { prisma } from "@/lib/prisma";
-import { buscarAgendamentos, buscarEventos, buscarOferta, type ConfigFonte, type Estatisticas } from "./clientes";
-import { gravarAgendamentos, gravarEventos, gravarOferta } from "./gravar";
+import { buscarAgendamentos, buscarEventos, buscarHorarios, buscarOferta, type ConfigFonte, type Estatisticas } from "./clientes";
+import { gravarAgendamentos, gravarEventos, gravarHorarios, gravarOferta } from "./gravar";
 import { ErroIntegracao } from "./http";
 
 /** Execução presa em EXECUTANDO há mais que isso é considerada interrompida. */
@@ -61,22 +61,27 @@ async function executarPelagem(config: ConfigFonte, inicio: Date): Promise<Execu
 async function executarLirio(config: ConfigFonte, inicio: Date): Promise<Execucao> {
   const hoje = hojeSP(inicio);
   const periodo = { de: somarDiasIso(hoje, -(DIAS_HISTORICO_LIRIO - 1)), ate: hoje };
-  const [eventos, oferta] = await Promise.all([buscarEventos(config, periodo), buscarOferta(config)]);
+  // Sequencial: a Lírio limita 60 req/min por IP; são 4 janelas de eventos + 4 de horários + 1.
+  const eventos = await buscarEventos(config, periodo);
+  const horarios = await buscarHorarios(config, periodo);
+  const oferta = await buscarOferta(config);
   const ge = await gravarEventos(eventos.eventos, periodo, inicio);
+  // Sem /horarios na origem, os dados por hora existentes ficam como estão (nada é apagado).
+  const gh = horarios.disponivel ? await gravarHorarios(horarios.horas, periodo, inicio) : { gravados: 0, removidos: 0 };
   const go = await gravarOferta(oferta.oferta, hoje, inicio);
-  const rejeitados = eventos.rejeitados + oferta.rejeitados;
+  const rejeitados = eventos.rejeitados + horarios.rejeitados + oferta.rejeitados;
   return {
     estatisticas: {
-      paginas: eventos.paginas + oferta.paginas,
-      lidos: eventos.lidos + oferta.lidos,
+      paginas: eventos.paginas + horarios.paginas + oferta.paginas,
+      lidos: eventos.lidos + horarios.lidos + oferta.lidos,
       rejeitados,
-      tentativasExtras: eventos.tentativasExtras + oferta.tentativasExtras,
-      motivos: [...eventos.motivos, ...oferta.motivos].slice(0, 5),
+      tentativasExtras: eventos.tentativasExtras + horarios.tentativasExtras + oferta.tentativasExtras,
+      motivos: [...eventos.motivos, ...horarios.motivos, ...oferta.motivos].slice(0, 5),
     },
-    gravados: ge.gravados + go.gravados,
-    removidos: ge.removidos + go.removidos,
-    parcial: rejeitados > 0,
-    resumo: `${eventos.eventos.length} linhas de eventos (${periodo.de} a ${periodo.ate}) e ${oferta.oferta.length} contagens de oferta (${oferta.totalProfissionais} profissionais)`,
+    gravados: ge.gravados + gh.gravados + go.gravados,
+    removidos: ge.removidos + gh.removidos + go.removidos,
+    parcial: rejeitados > 0 || !horarios.disponivel,
+    resumo: `${eventos.eventos.length} linhas de eventos e ${horarios.horas.length} de buscas por hora (${periodo.de} a ${periodo.ate}), ${oferta.oferta.length} contagens de oferta (${oferta.totalProfissionais} profissionais)`,
   };
 }
 

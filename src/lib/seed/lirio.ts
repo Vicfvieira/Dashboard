@@ -231,3 +231,60 @@ export function gerarEventos(op: OpcoesLirio): EventoSeed[] {
   }
   return linhas;
 }
+
+export interface HoraSeed {
+  dia: Date;
+  hora: number;
+  buscas: number;
+}
+
+/**
+ * Perfil de buscas por hora (0 a 23, horário de SP), medido nos eventos reais da Lírio: madrugada
+ * quase vazia, subida de manhã, pico no almoço e o maior pico entre 19h e 21h.
+ */
+const PERFIL_HORA = [108, 67, 35, 33, 24, 60, 201, 464, 713, 840, 893, 996, 1136, 1150, 967, 874, 793, 793, 1026, 1226, 1348, 1262, 841, 414];
+
+/** Fim de semana: manhã mais tarde e tarde mais cheia. */
+function pesoHora(hora: number, fimDeSemana: boolean): number {
+  const base = PERFIL_HORA[hora] ?? 0;
+  if (!fimDeSemana) return base;
+  if (hora >= 6 && hora <= 9) return base * 0.6;
+  if (hora >= 14 && hora <= 17) return base * 1.25;
+  return base;
+}
+
+/**
+ * Distribui as buscas de cada dia (soma dos eventos) pelas 24 horas. A soma por dia bate com a
+ * de MarketEventFact, para o mapa de calor e o funil contarem a mesma história.
+ */
+export function gerarBuscasPorHora(eventos: readonly EventoSeed[]): HoraSeed[] {
+  const porDia = new Map<string, { dia: Date; buscas: number }>();
+  for (const e of eventos) {
+    const chave = isoDia(e.dia);
+    const atual = porDia.get(chave) ?? { dia: e.dia, buscas: 0 };
+    atual.buscas += e.buscas;
+    porDia.set(chave, atual);
+  }
+  const linhas: HoraSeed[] = [];
+  for (const [chave, { dia, buscas }] of porDia) {
+    if (buscas === 0) continue;
+    const s = sorteio(`lirio:horas:${chave}`);
+    const fds = diaDaSemana(dia) === 0 || diaDaSemana(dia) === 6;
+    const pesos = Array.from({ length: 24 }, (_, h) => pesoHora(h, fds) * (0.85 + s.real() * 0.3));
+    const soma = pesos.reduce((t, p) => t + p, 0);
+    // Maiores restos: inteiros que somam exatamente o total do dia.
+    const esperado = pesos.map((p) => (buscas * p) / soma);
+    const inteiros = esperado.map(Math.floor);
+    let faltam = buscas - inteiros.reduce((t, v) => t + v, 0);
+    const ordem = esperado.map((v, h) => ({ h, resto: v - Math.floor(v) })).sort((a, b) => b.resto - a.resto);
+    for (const { h } of ordem) {
+      if (faltam <= 0) break;
+      inteiros[h] = (inteiros[h] ?? 0) + 1;
+      faltam--;
+    }
+    inteiros.forEach((n, hora) => {
+      if (n > 0) linhas.push({ dia, hora, buscas: n });
+    });
+  }
+  return linhas;
+}

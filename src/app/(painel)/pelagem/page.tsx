@@ -5,7 +5,7 @@ import { CabecalhoPagina } from "@/components/painel/cabecalho-pagina";
 import { EsqueletoDashboard } from "@/components/painel/esqueletos";
 import { EstadoVazio } from "@/components/painel/estado-vazio";
 import { CancelamentoPorDia, FaturamentoSemanal, MixPorteEspecie, TopServicos } from "@/components/pelagem/graficos";
-import { MapaCalor } from "@/components/pelagem/mapa-calor";
+import { MapaCalorPelagem } from "@/components/pelagem/mapa-calor";
 import { TabelaInativos } from "@/components/pelagem/tabela-inativos";
 import { Button } from "@/components/ui/button";
 import { CartoesKpi } from "@/components/visao-geral/cartoes-kpi";
@@ -94,7 +94,7 @@ async function Conteudo({ searchParams }: { searchParams: PageProps<"/pelagem">[
           <div className="grid gap-4 lg:grid-cols-3">
             <FaturamentoSemanal semanas={dados.semanal} podeVerFinanceiro={financeiro} descricaoIntervalo={periodoTexto} />
             <MixPorteEspecie mix={dados.mix} descricaoIntervalo={periodoTexto} />
-            <MapaCalor celulas={dados.calor} descricaoIntervalo={periodoTexto} />
+            <MapaCalorPelagem celulas={dados.calor} descricaoIntervalo={periodoTexto} />
             <CancelamentoPorDia dias={dados.cancelamento} taxaGeral={dados.atual.taxaCancelamento} comparar={filtros.comparar} descricaoIntervalo={periodoTexto} />
             <div className="lg:col-span-3">
               <TopServicos servicos={dados.servicos} podeVerFinanceiro={financeiro} comparar={filtros.comparar} descricaoIntervalo={periodoTexto} />

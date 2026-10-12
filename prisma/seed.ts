@@ -12,7 +12,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { DISTRITOS, SUBPREFEITURAS } from "@/data/sp-geo";
 import { gerarAtendimentos } from "@/lib/seed/pelagem";
-import { gerarEventos, gerarOferta } from "@/lib/seed/lirio";
+import { gerarBuscasPorHora, gerarEventos, gerarOferta } from "@/lib/seed/lirio";
 import { diaSP, somarDias } from "@/lib/seed/datas";
 
 const prisma = new PrismaClient();
@@ -115,8 +115,12 @@ async function seedLirio(inicio: Date, hoje: Date) {
   const novosEventos = await emLotes(eventos, (lote) =>
     prisma.marketEventFact.createMany({ data: lote.map((l) => ({ ...l, origem: "SEED" as const })), skipDuplicates: true }),
   );
-  console.log(`lírio: ${oferta.length} fotos de oferta (${novaOferta} novas), ${eventos.length} linhas de eventos (${novosEventos} novas)`);
-  return { lidos: oferta.length + eventos.length, gravados: novaOferta + novosEventos };
+  const horas = gerarBuscasPorHora(eventos);
+  const novasHoras = await emLotes(horas, (lote) =>
+    prisma.searchHourFact.createMany({ data: lote.map((l) => ({ ...l, origem: "SEED" as const })), skipDuplicates: true }),
+  );
+  console.log(`lírio: ${oferta.length} fotos de oferta (${novaOferta} novas), ${eventos.length} linhas de eventos (${novosEventos} novas), ${horas.length} linhas por hora (${novasHoras} novas)`);
+  return { lidos: oferta.length + eventos.length + horas.length, gravados: novaOferta + novosEventos + novasHoras };
 }
 
 async function registrarSync(fonte: "PELAGEM" | "LIRIO", r: { lidos: number; gravados: number }, inicioMs: number) {

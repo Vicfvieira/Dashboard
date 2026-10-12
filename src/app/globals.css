@@ -42,6 +42,8 @@
   --serie-lirio: #a85c86;
   /* Espécie no Pelagem: cachorro usa a série da marca; gato, azul validado com ela (CVD e ≥ 3:1). */
   --serie-gato: #3e7cb1;
+  /* Texto sobre células fortes do mapa de calor da Lírio (fundo claro: escuro; escuro: branco). */
+  --calor-texto-lirio: #15151c;
 
   /* Séries de gráficos */
   --chart-1: #7c3aed;
@@ -63,6 +65,7 @@
 .dark {
   --background: #0f0f14;
   --foreground: #ededf2;
+  --calor-texto-lirio: #ffffff;
   --card: #1a1a23;
   --card-foreground: #ededf2;
   --popover: #1a1a23;

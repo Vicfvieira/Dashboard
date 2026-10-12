@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import type { AgendamentoApi } from "./esquemas";
+import type { AgendamentoApi, HoraApi } from "./esquemas";
 import type { EventoNormalizado, OfertaNormalizada } from "./clientes";
 
 /**
@@ -126,6 +126,35 @@ export async function gravarEventos(eventos: readonly EventoNormalizado[], perio
       }
       const removidos = await tx.$executeRaw`
         DELETE FROM "MarketEventFact"
+        WHERE "dia" BETWEEN ${periodo.de}::date AND ${periodo.ate}::date
+          AND "sincronizadoEm" < ${inicioExecucao}`;
+      return { gravados, removidos };
+    },
+    { timeout: 60_000, maxWait: 10_000 },
+  );
+}
+
+export async function gravarHorarios(horas: readonly HoraApi[], periodo: { de: string; ate: string }, inicioExecucao: Date): Promise<ResultadoGravacao> {
+  return prisma.$transaction(
+    async (tx: Tx) => {
+      let gravados = 0;
+      for (const lote of lotes(horas)) {
+        gravados += await tx.$executeRaw`
+          INSERT INTO "SearchHourFact" ("id", "dia", "hora", "buscas", "origem", "sincronizadoEm")
+          SELECT u.id, u.dia::date, u.hora, u.buscas, 'API'::"OrigemDado", ${inicioExecucao}
+          FROM unnest(
+            ${lote.map(() => randomUUID())}::text[],
+            ${lote.map((h) => h.dia)}::text[],
+            ${lote.map((h) => h.hora)}::int[],
+            ${lote.map((h) => h.buscas)}::int[]
+          ) AS u(id, dia, hora, buscas)
+          ON CONFLICT ("dia", "hora") DO UPDATE SET
+            "buscas" = EXCLUDED."buscas",
+            "origem" = 'API',
+            "sincronizadoEm" = EXCLUDED."sincronizadoEm"`;
+      }
+      const removidos = await tx.$executeRaw`
+        DELETE FROM "SearchHourFact"
         WHERE "dia" BETWEEN ${periodo.de}::date AND ${periodo.ate}::date
           AND "sincronizadoEm" < ${inicioExecucao}`;
       return { gravados, removidos };

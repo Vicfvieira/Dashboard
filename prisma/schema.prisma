@@ -225,6 +225,20 @@ model ProfessionalStat {
 }
 
 /// Demanda agregada por dia, distrito e categoria. Distrito ou categoria nulos = busca sem esse filtro.
+/// Lírio: buscas por dia e hora (fuso de SP), para horários e dias de pico. Cidade inteira.
+model SearchHourFact {
+  id             String     @id @default(cuid())
+  dia            DateTime   @db.Date
+  /// 0 a 23, hora local de São Paulo.
+  hora           Int
+  buscas         Int        @default(0)
+  origem         OrigemDado
+  sincronizadoEm DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([dia, hora])
+  @@index([dia])
+}
+
 model MarketEventFact {
   id               String     @id @default(cuid())
   /// "AAAA-MM-DD|distrito|categoria" com "-" para nulos (chave de idempotência do upsert).

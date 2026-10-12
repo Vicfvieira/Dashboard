@@ -7,11 +7,14 @@ import {
   agendamentoApi,
   contagemProfissionaisApi,
   eventoApi,
+  horaApi,
   paginaAgendamentos,
   respostaEventos,
+  respostaHorarios,
   respostaProfissionais,
   validarItens,
   type AgendamentoApi,
+  type HoraApi,
 } from "./esquemas";
 import { ErroIntegracao, requisitarJson, type OpcoesRequisicao } from "./http";
 
@@ -164,6 +167,43 @@ export async function buscarEventos(config: ConfigFonte, periodo: { de: string; 
     }
   }
   return { eventos: [...eventos.values()], de: periodo.de, ate: periodo.ate, paginas: janelas.length, lidos, rejeitados, tentativasExtras, motivos };
+}
+
+export interface ResultadoHorarios extends Estatisticas {
+  horas: HoraApi[];
+  /** false quando a Lírio ainda não publica /horarios (404): o resto da sincronização segue. */
+  disponivel: boolean;
+}
+
+/** Buscas por dia e hora, nas mesmas janelas de /eventos. */
+export async function buscarHorarios(config: ConfigFonte, periodo: { de: string; ate: string }, deps: Dependencias = {}): Promise<ResultadoHorarios> {
+  const horas = new Map<string, HoraApi>();
+  const motivos: string[] = [];
+  let rejeitados = 0;
+  let tentativasExtras = 0;
+  let lidos = 0;
+  const janelas = dividirEmJanelas(periodo.de, periodo.ate, MAX_DIAS_EVENTOS);
+
+  for (const janela of janelas) {
+    let resposta;
+    try {
+      resposta = await requisitarJson(url(config.baseUrl, "horarios", janela), { chave: config.chave, ...deps });
+    } catch (e) {
+      if (e instanceof ErroIntegracao && e.detalhes.status === 404) {
+        return { horas: [], disponivel: false, paginas: 0, lidos: 0, rejeitados: 0, tentativasExtras, motivos: ["/horarios ainda não existe na Lírio (404)"] };
+      }
+      throw e;
+    }
+    tentativasExtras += resposta.tentativas - 1;
+    const envelope = respostaHorarios.safeParse(resposta.corpo);
+    if (!envelope.success) throw envelopeInvalido("horarios", envelope.error.issues[0]?.message ?? "formato inesperado");
+    lidos += envelope.data.itens.length;
+    const v = validarItens(envelope.data.itens, horaApi);
+    rejeitados += v.rejeitados;
+    motivos.push(...v.motivos.slice(0, 5 - motivos.length));
+    for (const h of v.validos) horas.set(`${h.dia}|${h.hora}`, h);
+  }
+  return { horas: [...horas.values()], disponivel: true, paginas: janelas.length, lidos, rejeitados, tentativasExtras, motivos };
 }
 
 export interface OfertaNormalizada {
