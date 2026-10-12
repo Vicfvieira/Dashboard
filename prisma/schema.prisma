@@ -1,0 +1,14 @@
+// Painelux — schema Prisma (PostgreSQL na Neon).
+// DATABASE_URL: conexão com pooling (PgBouncer), usada pela aplicação em runtime.
+// DIRECT_URL: conexão direta, usada pelo Prisma Migrate.
+// Os modelos de domínio são adicionados na Etapa 2.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
